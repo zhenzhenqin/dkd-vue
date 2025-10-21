@@ -64,7 +64,7 @@
 
     <el-table v-loading="loading" :data="nodeList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="序号" width="50" align="center" prop="id" />
+      <el-table-column label="序号" type="index" width="50" align="center" prop="id" />
       <el-table-column label="点位名称" align="center" prop="nodeName" />
       <el-table-column label="所在区域" align="center" prop="region.regionName" /> 
       <el-table-column label="商圈类型" align="center" prop="businessType">
@@ -76,7 +76,6 @@
       <el-table-column label="详细地址" align="center" prop="address" show-overflow-tooltip />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <!-- <el-button link type="primary" @click="getNodeInfo(scope.row)" v-hasPermi="['manage:node:edit']">查看详情</el-button> -->
           <el-button link type="primary" @click="handleUpdate(scope.row)" v-hasPermi="['manage:node:edit']">修改</el-button>
           <el-button link type="primary" @click="handleDelete(scope.row)" v-hasPermi="['manage:node:remove']">删除</el-button>
         </template>
@@ -140,7 +139,6 @@ import { reactive } from "vue";
 
 const { proxy } = getCurrentInstance();
 const { business_type } = proxy.useDict('business_type');
-
 const nodeList = ref([]);
 const open = ref(false);
 const loading = ref(true);

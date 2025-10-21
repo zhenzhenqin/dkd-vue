@@ -2,12 +2,7 @@
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="区域名称" prop="regionName">
-        <el-input
-          v-model="queryParams.regionName"
-          placeholder="请输入区域名称"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+        <el-input v-model="queryParams.regionName" placeholder="请输入区域名称" clearable @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
@@ -17,42 +12,19 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-          v-hasPermi="['manage:region:add']"
-        >新增</el-button>
+        <el-button type="primary" plain icon="Plus" @click="handleAdd" v-hasPermi="['manage:region:add']">新增</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['manage:region:edit']"
-        >修改</el-button>
+        <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate"
+          v-hasPermi="['manage:region:edit']">修改</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['manage:region:remove']"
-        >删除</el-button>
+        <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete"
+          v-hasPermi="['manage:region:remove']">删除</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="Download"
-          @click="handleExport"
-          v-hasPermi="['manage:region:export']"
-        >导出</el-button>
+        <el-button type="warning" plain icon="Download" @click="handleExport"
+          v-hasPermi="['manage:region:export']">导出</el-button>
       </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -65,19 +37,18 @@
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" @click="handleUpdate(scope.row)" v-hasPermi="['manage:region:edit']">修改</el-button>
-          <el-button link type="primary" @click="handleDelete(scope.row)" v-hasPermi="['manage:region:remove']">删除</el-button>
+          <el-button link type="primary" @click="getRegionInfo(scope.row)"
+            v-hasPermi="['manage:region:list']">查看详情</el-button>
+          <el-button link type="primary" @click="handleUpdate(scope.row)"
+            v-hasPermi="['manage:region:edit']">修改</el-button>
+          <el-button link type="primary" @click="handleDelete(scope.row)"
+            v-hasPermi="['manage:region:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      v-model:page="queryParams.pageNum"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
-    />
+
+    <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum"
+      v-model:limit="queryParams.pageSize" @pagination="getList" />
 
     <!-- 添加或修改区域管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
@@ -96,11 +67,27 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 查看详情对话框 -->
+    <el-dialog title="区域详情" v-model="regionInfo" width="500px" append-to-body>
+      <el-form-item label="区域名称" prop="regionName">
+        <el-input v-model="form.regionName" disabled />
+      </el-form-item>
+      <label>包含点位：</label>
+      <p></p>
+      <el-table :data="nodeList">
+        <el-table-column label="序号" type="index" width="50" align="center" prop="id" />
+        <el-table-column label="点位名称" align="center" prop="nodeName" />
+        <el-table-column label="设备数量" align="center" prop="vmCount" />
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script setup name="Region">
 import { listRegion, getRegion, delRegion, addRegion, updateRegion } from "@/api/manage/region";
+import { listNode } from "@/api/manage/node";
+import { loadAllParams } from "@/api/page";
 
 const { proxy } = getCurrentInstance();
 
@@ -197,6 +184,29 @@ function handleUpdate(row) {
   });
 }
 
+/* 查看详情按钮操作 */
+const regionInfo = ref(false);
+const nodeList = ref([]);
+function getRegionInfo(row) {
+  //查询区域详情
+  reset();
+  const _id = row.id
+  getRegion(_id).then(response => {
+    form.value = response.data;
+  });
+  //查询点位信息
+  loadAllParams.regionId = _id;
+  listNode(loadAllParams).then(response => {
+    nodeList.value = response.rows;
+    nodeList.value.forEach(item => {
+      if (item.vmCount == null) {
+        item.vmCount = 0;
+      }
+    });
+  });
+  regionInfo.value = true;
+}
+
 /** 提交按钮 */
 function submitForm() {
   proxy.$refs["regionRef"].validate(valid => {
@@ -221,12 +231,12 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除区域管理编号为"' + _ids + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除区域管理编号为"' + _ids + '"的数据项？').then(function () {
     return delRegion(_ids);
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
-  }).catch(() => {});
+  }).catch(() => { });
 }
 
 /** 导出按钮操作 */
