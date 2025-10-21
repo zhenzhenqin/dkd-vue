@@ -109,7 +109,7 @@
 
     <el-table v-loading="loading" :data="vmList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <!-- <el-table-column label="主键" align="center" prop="id" /> -->
+      <el-table-column label="序号" type="index" width="50" align="center"/>
       <el-table-column label="设备编号" align="center" prop="innerCode" />
       <el-table-column label="设备型号" align="center" prop="vmTypeId">
         <template #default="scope">
@@ -119,21 +119,27 @@
         </template>
       </el-table-column>
       <el-table-column label="详细地址" align="center" prop="addr" />
-      <el-table-column label="合作商" align="center" prop="partnerId">
+      <!-- <el-table-column label="合作商" align="center" prop="partnerId">
         <template #default="scope">
           <div v-for="item in partnerList" :key="item.id">
             <span v-if="item.id === scope.row.partnerId">{{ item.partnerName }}</span>
           </div>
         </template>
-      </el-table-column>
-      <el-table-column label="设备状态" align="center" prop="vmStatus">
+      </el-table-column> -->
+      <el-table-column label="运营状态" align="center" prop="vmStatus">
         <template #default="scope">
           <dict-tag :options="vm_status" :value="scope.row.vmStatus"/>
         </template>
       </el-table-column> 
+      <el-table-column label="设备状态" align="center" prop="vmStatus">
+        <template #default="scope">
+          {{ scope.row.runningStatus != null ? JSON.parse(scope.row.runningStatus).status == true ? '正常' : '异常' : '异常' }}
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" @click="handleUpdate(scope.row)" v-hasPermi="['manage:vm:edit']">修改</el-button>
+          <el-button link type="primary" @click="(scope.row)" v-hasPermi="['manage:vm:edit']">查看详情</el-button>
+          <!-- <el-button link type="primary" @click="handleUpdate(scope.row)" v-hasPermi="['manage:vm:edit']">修改</el-button> -->
           <!-- <el-button link type="primary" @click="handleDelete(scope.row)" v-hasPermi="['manage:vm:remove']">删除</el-button> -->
         </template>
       </el-table-column>
