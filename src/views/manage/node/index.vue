@@ -275,7 +275,7 @@ function handleUpdate(row) {
 const nodeOpen = ref(false);
 const vmList = ref([]);
 function getNodeInfo(row) {
-  const _id = row.id;    //点位id
+  const _id = row.id;    //点位id 将点位id传入后端使用node对象去接收，此处id对应的后端Node对象中的node_id字段 
   // 获取设备编号以及设备状态
   listVm({nodeId: _id}).then(response => {
     vmList.value = response.rows;
