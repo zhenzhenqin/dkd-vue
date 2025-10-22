@@ -59,7 +59,7 @@
 
     <el-table v-loading="loading" :data="skuClassList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="序号" type="index" align="center" prop="classId" />
+      <el-table-column label="序号" type="index" width="100" align="center" prop="classId" />
       <el-table-column label="商品类型" align="center" prop="className" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
@@ -80,7 +80,7 @@
     <!-- 添加或修改商品类型对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="skuClassRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="类别名称" prop="className">
+        <el-form-item label="类别名称"  prop="className">
           <el-input v-model="form.className" placeholder="请输入类别名称" />
         </el-form-item>
       </el-form>

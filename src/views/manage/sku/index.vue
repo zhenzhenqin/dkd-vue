@@ -9,14 +9,14 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="商品类型Id" prop="classId">
+      <!-- <el-form-item label="商品类型Id" prop="classId">
         <el-input
           v-model="queryParams.classId"
           placeholder="请输入商品类型Id"
           clearable
           @keyup.enter="handleQuery"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -67,7 +67,7 @@
 
     <el-table v-loading="loading" :data="skuList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="skuId" />
+      <el-table-column label="序号" width="50" align="center" prop="skuId" />
       <el-table-column label="商品名称" align="center" prop="skuName" />
       <el-table-column label="商品图片" align="center" prop="skuImage" width="100">
         <template #default="scope">
@@ -75,10 +75,19 @@
         </template>
       </el-table-column>
       <el-table-column label="品牌" align="center" prop="brandName" />
-      <el-table-column label="规格(净含量)" align="center" prop="unit" />
-      <el-table-column label="商品价格，单位分" align="center" prop="price" />
-      <el-table-column label="商品类型Id" align="center" prop="classId" />
-      <el-table-column label="是否打折促销" align="center" prop="isDiscount" />
+      <el-table-column label="规格" align="center" prop="unit" />
+      <el-table-column label="商品价格" align="center" prop="price">
+        <template #default="scope">
+          <span>{{ (scope.row.price / 100).toFixed(2) }}元</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="商品类型" align="center" prop="classId">
+        <template #default="scope">
+          <div v-for="item in skuClassList" :key="item.classId">
+            <span v-if="scope.row.classId == item.classId">{{ item.className }}</span>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="创建时间" align="center" prop="createTime" width="180">
         <template #default="scope">
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
@@ -86,8 +95,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['manage:sku:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['manage:sku:remove']">删除</el-button>
+          <el-button link type="primary" @click="handleUpdate(scope.row)" v-hasPermi="['manage:sku:edit']">修改</el-button>
+          <el-button link type="primary" @click="handleDelete(scope.row)" v-hasPermi="['manage:sku:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -137,6 +146,8 @@
 
 <script setup name="Sku">
 import { listSku, getSku, delSku, addSku, updateSku } from "@/api/manage/sku";
+import { listSkuClass } from "@/api/manage/skuClass";
+import { loadAllParams } from "@/api/page";
 
 const { proxy } = getCurrentInstance();
 
@@ -294,5 +305,14 @@ function handleExport() {
   }, `sku_${new Date().getTime()}.xlsx`)
 }
 
+/* 查询商品类型列表 */
+const skuClassList = ref([]);
+function getSkuClassList() {
+  listSkuClass(loadAllParams).then(response => {
+    skuClassList.value = response.rows;
+  });
+}
+
+getSkuClassList();
 getList();
 </script>
