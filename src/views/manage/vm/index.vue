@@ -105,6 +105,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
+          <el-button link type="primary" @click="handleGoods(scope.row)" v-hasPermi="['manage:vm:edit']">货道</el-button>
           <el-button link type="primary" @click="handleUpdatePolicy(scope.row)"
             v-hasPermi="['manage:vm:edit']">策略</el-button>
           <el-button link type="primary" @click="handleUpdate(scope.row)" v-hasPermi="['manage:vm:edit']">修改</el-button>
@@ -113,8 +114,8 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize"
-      @pagination="getList" />
+    <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum"
+      v-model:limit="queryParams.pageSize" @pagination="getList" />
 
     <!-- 添加或修改设备管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
@@ -188,6 +189,9 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 货道组件 -->
+    <ChannelDialog :goodVisible="goodVisible" :goodData="goodData" @handleCloseGood="handleCloseGood"></ChannelDialog>
   </div>
 </template>
 
@@ -198,6 +202,8 @@ import { listPartner } from "@/api/manage/partner";
 import { listNode } from "@/api/manage/node";
 import { listPolicy } from "@/api/manage/policy";
 import { loadAllParams } from "@/api/page";
+
+import ChannelDialog from './components/ChannelDialog.vue'; //货道组件
 
 const { proxy } = getCurrentInstance();
 const { vm_status } = proxy.useDict('vm_status');
@@ -369,6 +375,18 @@ function handleExport() {
   }, `vm_${new Date().getTime()}.xlsx`)
 }
 
+const goodVisible = ref(false); //货道弹层显示隐藏
+const goodData = ref({}); //货道信息用来拿取 vmTypeId和innerCode
+// 打开货道弹层
+const handleGoods = (row) => {
+  goodVisible.value = true;
+  goodData.value = row;
+};
+// 关闭货道弹层
+const handleCloseGood = () => {
+  goodVisible.value = false;
+};
+
 /* 获取设备型号列表 */
 const vm_typeList = ref([]);
 function getVm_typeList() {
@@ -407,3 +425,4 @@ getVm_typeList();
 getPartnerList();
 getList();
 </script>
+<style lang="scss" scoped src="./index.scss"></style>

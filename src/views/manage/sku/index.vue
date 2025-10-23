@@ -245,7 +245,7 @@ function resetQuery() {
   handleQuery();
 }
 
-// 多选框选中数据
+/* 多选框选中数据 */
 function handleSelectionChange(selection) {
   ids.value = selection.map(item => item.skuId);
   single.value = selection.length != 1;
@@ -326,7 +326,7 @@ const uploadExcelUrl = ref(import.meta.env.VITE_APP_BASE_API + "/manage/sku/impo
 const headers = ref({ Authorization: "Bearer " + getToken() }); //上传文件携带的请求头
 
 // 上传成功回调
-function handleUploadSuccess(res, file) {
+function handleUploadSuccess(res) {
   if (res.code === 200) {
     proxy.$modal.msgSuccess("上传文件成功");
     excelOpen.value = false;
@@ -334,14 +334,14 @@ function handleUploadSuccess(res, file) {
   } else {
     proxy.$modal.msgError(res.msg);
   }
-  uploadRef.value.clearFiles();
-  proxy.$modal.closeLoading();
+  uploadRef.value.clearFiles(); //清除显示的已经上传的文件
+  proxy.$modal.closeLoading(); //关闭loading加载
 }
 
 // 上传失败
 function handleUploadError() {
   proxy.$modal.msgError("上传文件失败");
-  uploadRef.value.clearFiles();
+  uploadRef.value.clearFiles(); //删除显示的已经上传的文件
 }
 
 /* 上传文件限制 */
@@ -364,7 +364,7 @@ const props = defineProps({
   }
 });
 
-// 上传前loading加载
+// 上传前loading加载 用于校验文件格式以及大小
 function handleBeforeUpload(file) {
   let isExcel = false;
   if (props.fileType.length) {
